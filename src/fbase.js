@@ -12,4 +12,7 @@ const firebaseConfig = {
 
 firebase.initializeApp(firebaseConfig);
 
+export const firebaseInstance = firebase;
+// 이렇게 export 하면 다른 파일에서 firebase.auth()를 하지 않고
+// 바로 authService를 가져오면 되기때문에 훨씬 명시적이다. 
 export const authService = firebase.auth();

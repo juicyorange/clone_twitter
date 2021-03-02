@@ -7,7 +7,10 @@ function App() {
   // firebase가 currentUser를 초기화하는데 시간이 걸린다.
   // 그래서 currentUser를 바로 출력해보면 null 이라고 표시된다.
   // 그러니 init state를 통해 firebase가 초기화되고 다음 작업을 수행할 수 있도록 해주자.
+
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [userObj, setUserObj] = useState(null);
+  // userObj를 제일 상단인 App.js에 놓은것은 하위의 다른 것들이 이것을 필요로 할수 있기 떄문이다.
 
   useEffect(() => {
     // 페이지에 처음 들어오고 auth에 변화가 있을때 init값을 변경해줌으로써 로그인이 되도록 한다. 변화가 없다면 자동로그인 x
@@ -17,6 +20,7 @@ function App() {
     authService.onAuthStateChanged((user) => {
       if (user) {
         setIsLoggedIn(true);
+        setUserObj(user);
       } else {
         setIsLoggedIn(false);
       }
@@ -26,7 +30,7 @@ function App() {
 
   return (
     <>
-      {init ? <AppRouter isLoggedIn={isLoggedIn} /> : "initializing...."}
+      {init ? <AppRouter isLoggedIn={isLoggedIn} userObj={userObj} /> : "initializing...."}
       <footer>&copy; {new Date().getFullYear()}</footer>
     </>
   );

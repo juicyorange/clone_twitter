@@ -11,6 +11,11 @@ const Navigation = ({ userObj }) => {
                 </li>
                 <li>
                     <Link to="/profile">{userObj.displayName ? userObj.displayName : userObj.email} Profile</Link>
+                    {userObj.photoURL &&
+                        <div>
+                            <img src={userObj.photoURL} width="50px" height="50px" />
+                        </div>
+                    }
                 </li>
             </ul>
         </nav>

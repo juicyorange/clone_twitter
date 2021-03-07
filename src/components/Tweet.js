@@ -10,6 +10,7 @@ const Tweet = ({ tweetObj, isOwner }) => {
         if (ok) {
             // tweet 삭제
             await dbService.doc(`tweets/${tweetObj.id}`).delete();
+            // 이미지URL을 이용하여 firebase storage안에서 ref를 받아오고, delete 수행
             await storageService.refFromURL(tweetObj.attachmentUrl).delete();
         }
     }

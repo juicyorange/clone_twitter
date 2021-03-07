@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { authService, dbService } from 'fbase';
+import { v4 as uuidv4 } from 'uuid';
+import { authService, dbService, storageService } from 'fbase';
 import { useHistory } from 'react-router-dom';
 
 const Profile = ({ refreshUser, userObj }) => {
     // 유저의 닉네임을 관리하기 위한 state
     const [newDisplayName, setNewDisplayName] = useState(userObj.displayName);
+    const [profAttachment, setProfAttachment] = useState("");
     const history = useHistory();
     const onLogOutClick = () => {
         authService.signOut();
@@ -21,6 +23,11 @@ const Profile = ({ refreshUser, userObj }) => {
         // console.log(myTweets.docs.map(doc => doc.data()));
     }
 
+    // 나의 프로필 이미지를 가져오는 함수
+    // const getMyPhoto = async () => {
+    //     tweetObj.profAttachment
+    // }
+
     const onChange = (e) => {
         const {
             target: { value },
@@ -30,6 +37,26 @@ const Profile = ({ refreshUser, userObj }) => {
 
     const onSubmit = async (e) => {
         e.preventDefault();
+
+        let profAttachmentUrl = "";
+
+        if (userObj.photoURL !== profAttachment) {
+            const profattachmentRef = storageService.ref().child(`profphoto/${userObj.uid}/${uuidv4()}`);
+            const response = await profattachmentRef.putString(profAttachment, "data_url");
+            profAttachmentUrl = await response.ref.getDownloadURL();
+
+            if (userObj.photoURL !== profAttachmentUrl) {
+                console.log(profAttachmentUrl);
+                console.log(userObj.photoURL);
+                if (userObj.photoURL) { await storageService.refFromURL(userObj.photoURL).delete(); }
+                await userObj.updateProfile({
+                    photoURL: profAttachmentUrl,
+                })
+            }
+            // url을 저장했기 때문에 다시 빈 스트링으로 만들어준다
+            setProfAttachment("");
+            refreshUser();
+        }
 
         if (userObj.displayName !== newDisplayName) {
             // firebase userObj 에서 제공하는 것은 photoUrl 과 displayName
@@ -42,6 +69,23 @@ const Profile = ({ refreshUser, userObj }) => {
         }
     }
 
+    const onFileChange = (e) => {
+        const { target: { files } } = e;
+        const theFile = files[0];
+        // 파일을 읽기 위해 fileReader API 사용
+        const reader = new FileReader();
+
+        reader.onloadend = (finishedEvent) => {
+            const { currentTarget: { result } } = finishedEvent;
+            setProfAttachment(result);
+        }
+        reader.readAsDataURL(theFile);
+    }
+
+    const onClearProfAttachment = () => {
+        setProfAttachment(null);
+    }
+
     useEffect(() => {
         getMyTweets();
     }, [])
@@ -49,6 +93,14 @@ const Profile = ({ refreshUser, userObj }) => {
         <>
             <form onSubmit={onSubmit}>
                 <input onChange={onChange} type="text" placeholder="닉네임" value={newDisplayName} />
+                <input type="file" aceept="image/*" onChange={onFileChange} />
+                <input type="Submit" defaultValue="Tweet" />
+                {profAttachment && (
+                    <div>
+                        <img src={profAttachment} width="50px" height="50px" />
+                        <button onClick={onClearProfAttachment}>Clear</button>
+                    </div>
+                )}
                 <input type="submit" value="Update Profile" />
             </form>
             <button onClick={onLogOutClick}>Log Out</button>

@@ -23,6 +23,7 @@ function App() {
         setUserObj({
           displayName: user.displayName,
           uid: user.uid,
+          photoURL: user.photoURL,
           // firebase에서 함수를 가져오기 위해 그냥 일반 함수의 형태만 적어준다.
           // 이것을 통해 함수를 받을 수 있다. 
           updateProfile: (args) => user.updateProfile(args),
@@ -43,6 +44,7 @@ function App() {
     setUserObj({
       displayName: user.displayName,
       uid: user.uid,
+      photoURL: user.photoURL,
       updateProfile: (args) => user.updateProfile(args),
     });
   }

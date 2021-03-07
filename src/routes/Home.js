@@ -6,7 +6,7 @@ import Tweet from '../components/Tweet';
 const Home = ({ userObj }) => {
     const [tweet, setTweet] = useState("");
     const [tweets, setTweets] = useState([]);
-    const [attachment, setAttachment] = useState();
+    const [attachment, setAttachment] = useState("");
     // 데이터를 get 하는 방식 중 오래된 방식임.
     /*
     const getTweets = async () => {

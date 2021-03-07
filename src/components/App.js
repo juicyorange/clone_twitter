@@ -20,7 +20,13 @@ function App() {
     authService.onAuthStateChanged((user) => {
       if (user) {
         setIsLoggedIn(true);
-        setUserObj(user);
+        setUserObj({
+          displayName: user.displayName,
+          uid: user.uid,
+          // firebase에서 함수를 가져오기 위해 그냥 일반 함수의 형태만 적어준다.
+          // 이것을 통해 함수를 받을 수 있다. 
+          updateProfile: (args) => user.updateProfile(args),
+        });
       } else {
         setIsLoggedIn(false);
       }
@@ -28,9 +34,22 @@ function App() {
     })
   }, [])
 
+  // 여기서 userObj 가 바뀌었다고 해주면 App의 유저 정보가 바뀌는 것이기 때문에
+  // 아래에 있는 컴포넌트 들이 모두 바뀐다.
+  // 이것을 profile에서 호출할것인데 이것은 App의 함수이고 유저정보는 App이 제일 상단이기 때문에
+  // 자동으로 그 아래의 모든 userObj를 사용하는 컴포넌트들이 리렌더링 되게 된다. 
+  const refreshUser = () => {
+    const user = authService.currentUser;
+    setUserObj({
+      displayName: user.displayName,
+      uid: user.uid,
+      updateProfile: (args) => user.updateProfile(args),
+    });
+  }
+
   return (
     <>
-      {init ? <AppRouter isLoggedIn={isLoggedIn} userObj={userObj} /> : "initializing...."}
+      {init ? <AppRouter refreshUser={refreshUser} isLoggedIn={isLoggedIn} userObj={userObj} /> : "initializing...."}
       <footer>&copy; {new Date().getFullYear()}</footer>
     </>
   );

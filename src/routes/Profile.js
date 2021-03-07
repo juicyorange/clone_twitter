@@ -1,15 +1,56 @@
-import React from 'react';
-import { authService } from 'fbase';
+import React, { useEffect, useState } from 'react';
+import { authService, dbService } from 'fbase';
 import { useHistory } from 'react-router-dom';
 
-const Profile = () => {
+const Profile = ({ refreshUser, userObj }) => {
+    // 유저의 닉네임을 관리하기 위한 state
+    const [newDisplayName, setNewDisplayName] = useState(userObj.displayName);
     const history = useHistory();
     const onLogOutClick = () => {
         authService.signOut();
         history.push("/");
+    };
+
+    // 내가 작성한 트윗들을 가져오는 함수
+    const getMyTweets = async () => {
+        const myTweets = await dbService
+            .collection("tweets")
+            .where("creatorId", "==", userObj.uid)
+            .orderBy("createdAt")
+            .get();
+        // console.log(myTweets.docs.map(doc => doc.data()));
     }
+
+    const onChange = (e) => {
+        const {
+            target: { value },
+        } = e;
+        setNewDisplayName(value);
+    }
+
+    const onSubmit = async (e) => {
+        e.preventDefault();
+
+        if (userObj.displayName !== newDisplayName) {
+            // firebase userObj 에서 제공하는 것은 photoUrl 과 displayName
+            // 뿐으로 많은 정보를 담을 수 없다. 이것을 firebase에서 해결하려면 firestore에 user를 위한 콜렉션을
+            // 만들어서 거기에 유저에 대한 정보를 담으면 된다. 
+            await userObj.updateProfile({
+                displayName: newDisplayName,
+            });
+            refreshUser();
+        }
+    }
+
+    useEffect(() => {
+        getMyTweets();
+    }, [])
     return (
         <>
+            <form onSubmit={onSubmit}>
+                <input onChange={onChange} type="text" placeholder="닉네임" value={newDisplayName} />
+                <input type="submit" value="Update Profile" />
+            </form>
             <button onClick={onLogOutClick}>Log Out</button>
         </>
     )

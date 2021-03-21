@@ -7,8 +7,6 @@ function App() {
   // firebase가 currentUser를 초기화하는데 시간이 걸린다.
   // 그래서 currentUser를 바로 출력해보면 null 이라고 표시된다.
   // 그러니 init state를 통해 firebase가 초기화되고 다음 작업을 수행할 수 있도록 해주자.
-
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userObj, setUserObj] = useState(null);
   // userObj를 제일 상단인 App.js에 놓은것은 하위의 다른 것들이 이것을 필요로 할수 있기 떄문이다.
 
@@ -19,7 +17,6 @@ function App() {
     // 유저정보를 주기 때문에 여기서 초기화가 끝났는지 확인하고 그것에 따라 동작하도록 해준다
     authService.onAuthStateChanged((user) => {
       if (user) {
-        setIsLoggedIn(true);
         setUserObj({
           displayName: user.displayName,
           uid: user.uid,
@@ -29,7 +26,7 @@ function App() {
           updateProfile: (args) => user.updateProfile(args),
         });
       } else {
-        setIsLoggedIn(false);
+        setUserObj(null);
       }
       setInit(true);
     })
@@ -51,7 +48,7 @@ function App() {
 
   return (
     <>
-      {init ? <AppRouter refreshUser={refreshUser} isLoggedIn={isLoggedIn} userObj={userObj} /> : "initializing...."}
+      {init ? <AppRouter refreshUser={refreshUser} isLoggedIn={Boolean(userObj)} userObj={userObj} /> : "initializing...."}
       <footer>&copy; {new Date().getFullYear()}</footer>
     </>
   );

@@ -40,7 +40,7 @@ const Profile = ({ refreshUser, userObj }) => {
 
         let profAttachmentUrl = "";
 
-        if (userObj.photoURL !== profAttachment) {
+        if (userObj.photoURL !== profAttachment && profAttachment !== "") {
             const profattachmentRef = storageService.ref().child(`profphoto/${userObj.uid}/${uuidv4()}`);
             const response = await profattachmentRef.putString(profAttachment, "data_url");
             profAttachmentUrl = await response.ref.getDownloadURL();
